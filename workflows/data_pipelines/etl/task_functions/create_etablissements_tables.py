@@ -37,11 +37,7 @@ from workflows.data_pipelines.etl.sqlite.queries.etablissements\
 )
 # fmt: on
 from helpers.labels.departements import all_deps
-from config import AIRFLOW_ETL_DATA_DIR
-from config import (
-    SIRENE_DATABASE_LOCATION,
-    RNE_DATABASE_LOCATION,
-)
+from helpers.settings import Settings
 
 
 def create_etablissement_table():
@@ -82,7 +78,7 @@ def create_flux_etablissement_table():
         index_column="siren",
     )
     # Upload flux data
-    df_etablissement = preprocess_etablissement_data("flux", None, AIRFLOW_ETL_DATA_DIR)
+    df_etablissement = preprocess_etablissement_data("flux", None, Settings.AIRFLOW_ETL_DATA_DIR)
     df_etablissement.to_sql(
         "flux_etablissement",
         sqlite_client.db_conn,
@@ -156,10 +152,10 @@ def count_nombre_etablissement_ouvert():
 
 def add_rne_data_to_siege_table(**kwargs):
     # Connect to the first database
-    sqlite_client_siren = SqliteClient(SIRENE_DATABASE_LOCATION)
+    sqlite_client_siren = SqliteClient(Settings.SIRENE_DATABASE_LOCATION)
 
     # Attach the RNE database
-    sqlite_client_siren.connect_to_another_db(RNE_DATABASE_LOCATION, "db_rne")
+    sqlite_client_siren.connect_to_another_db(Settings.RNE_DATABASE_LOCATION, "db_rne")
 
     try:
         # Update existing rows in main siege table based on siren from rne.siege
@@ -196,7 +192,7 @@ def create_historique_etablissement_table(**kwargs):
     )
 
     for df_hist_etablissement in preprocess_historique_etablissement_data(
-        AIRFLOW_ETL_DATA_DIR,
+        Settings.AIRFLOW_ETL_DATA_DIR,
     ):
         df_hist_etablissement.to_sql(
             table_name, sqlite_client.db_conn, if_exists="append", index=False
@@ -242,7 +238,7 @@ def create_date_fermeture_etablissement_table(**kwargs):
 
 
 def insert_date_fermeture_etablissement(**kwargs):
-    sqlite_client = SqliteClient(SIRENE_DATABASE_LOCATION)
+    sqlite_client = SqliteClient(Settings.SIRENE_DATABASE_LOCATION)
     sqlite_client.execute(insert_date_fermeture_etablissement_query)
     sqlite_client.execute(insert_date_fermeture_siege_query)
     sqlite_client.commit_and_close_conn()
