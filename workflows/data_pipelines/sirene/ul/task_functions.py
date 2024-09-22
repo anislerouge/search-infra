@@ -1,6 +1,6 @@
 import requests
 
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 from helpers.tchap import send_message
 
@@ -18,7 +18,7 @@ def download_historique_ul():
 
 
 def send_stock_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": f"{Settings.INSEE_TMP_FOLDER}ul/",
@@ -31,7 +31,7 @@ def send_stock_file_to_minio():
 
 
 def send_historique_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": f"{Settings.INSEE_TMP_FOLDER}ul/",

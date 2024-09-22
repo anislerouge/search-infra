@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import requests
 
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 from helpers.tchap import send_message
 
@@ -18,22 +18,25 @@ def preprocess_organisme_formation_data(ti):
     )
 
     # Renommage des colonnes
+    # Numéro Déclaration Activité;Numéro Déclaration Activité Précédent;denomination;Code SIREN;Siret Etablissement Déclarant;Adresse Organisme de Formation;Code Postal Organisme de Formation;Ville Organisme de Formation;Code Région Organisme de Formation;geocodageban;Actions de formations;Bilans de compétences;VAE;Actions de formations par apprentissage;Dénomination Organisme Etranger Représenté;Adresse Organisme Etranger Représenté;Code Postal Organisme Etranger Représenté;Ville Organisme Etranger Représenté;Pays Organisme Etranger Représenté;Date dernière déclaration;Début d'exercice;Fin d'exercice;Code Spécialité 1;Libellé Spécialité 1;Code Spécialité 2;Libellé Spécialité 2;Code Spécialité 3;Libellé Spécialité 3;Nombre de stagiaires;Nombre de stagiaires confiés par un autre Organisme de formation;Effectifs de formateurs;Code Commune;Nom Officiel Commune / Arrondissement Municipal;Code Officiel EPCI;Nom Officiel EPCI;Code Officiel Département;Nom Officiel Département;Nom Officiel Région;Code Officiel Région;Toutes spécialités de l'organisme de formation;Organisme Formation Géocodé;Certifications;random_id
+
+
     df_organisme_formation = df_organisme_formation.rename(
         columns={
-            "id_nda": "id_nda",
-            "id_nda_precedent": "id_nda_precedent",
+            "Numéro Déclaration Activité": "id_nda",
+            "Numéro Déclaration Activité Précédent": "id_nda_precedent",
             "denomination": "denomination",
-            "siren": "siren",
-            "siret": "siret",
+            "Code SIREN": "siren",
+            "Siret Etablissement Déclarant": "siret",
             "adresse": "adresse",
             "code_postal": "code_postal",
             "ville": "ville",
-            "code_region": "code_region",
+            "Code Région Organisme de Formation": "code_region",
             "geocodageban": "geocodageban",
-            "cert_adf": "cert_adf",
-            "cert_bdc": "cert_bdc",
-            "cert_vae": "cert_vae",
-            "cert_app": "cert_app",
+            "Actions de formations": "cert_adf",
+            "Bilans de compétences": "cert_bdc",
+            "VAE": "cert_vae",
+            "Actions de formations par apprentissage": "cert_app",
             "Dénomination Organisme Etranger Représenté": "denomination_organisme_etranger",
             "Adresse Organisme Etranger Représenté": "adresse_organisme_etranger",
             "Code Postal Organisme Etranger Représenté": "code_postal_organisme_etranger",
@@ -61,8 +64,7 @@ def preprocess_organisme_formation_data(ti):
             "Code Officiel Région": "code_region_officiel",
             "Toutes spécialités de l'organisme de formation": "toutes_specialites",
             "Organisme Formation Géocodé": "organisme_formation_geocode",
-            "certifications": "certifications",
-            "random_id": "random_id"
+            "Certifications": "certifications",
         }
     )
 
@@ -71,64 +73,30 @@ def preprocess_organisme_formation_data(ti):
         Settings.FORMATION_TMP_FOLDER + "qualiopi-download-v2.csv", index=False, sep=";"
     )
 
-    df_organisme_formation = df_organisme_formation[
-        [
-            "id_nda",
-            "siren",
-            "siret",
-            "cert_adf",
-            "cert_bdc",
-            "cert_vae",
-            "cert_app",
-            "certifications",
-        ]
-    ]
-    df_organisme_formation = df_organisme_formation.where(
-        pd.notnull(df_organisme_formation), None
-    )
-    df_organisme_formation["est_qualiopi"] = df_organisme_formation.apply(
-        lambda x: True if x["certifications"] else False, axis=1
-    )
-    df_organisme_formation = df_organisme_formation[["siren", "est_qualiopi", "id_nda"]]
-    df_liste_organisme_formation = (
-        df_organisme_formation.groupby(["siren"])[["id_nda"]].agg(list).reset_index()
-    )
-    df_liste_organisme_formation["id_nda"] = df_liste_organisme_formation[
-        "id_nda"
-    ].astype(str)
-    df_liste_organisme_formation = pd.merge(
-        df_liste_organisme_formation,
-        df_organisme_formation[["siren", "est_qualiopi"]],
-        on="siren",
-        how="left",
-    )
-    df_liste_organisme_formation = df_liste_organisme_formation.rename(
-        columns={
-            "id_nda": "liste_id_organisme_formation",
-        }
-    )
-    # Drop est_qualiopi=False when True value exists
-    df_liste_organisme_formation.sort_values(
-        "est_qualiopi", ascending=False, inplace=True
-    )
-    df_liste_organisme_formation.drop_duplicates(
-        subset=["siren", "liste_id_organisme_formation"], keep="first", inplace=True
-    )
+    # Grouper les données par SIRET et lister les ID_NDA et les certifications
+    df_grouped = df_organisme_formation.groupby("siret").agg(
+        id_nda=("id_nda", lambda x: ",".join(map(str, x))),
+        certifications=("certifications", lambda x: ",".join(map(str, x)))
+    ).reset_index()
 
-    df_liste_organisme_formation.to_csv(
+    # Sauvegarder le fichier final
+    df_grouped.to_csv(
         f"{Settings.FORMATION_TMP_FOLDER}formation.csv", index=False
     )
+
+    # Stocker le nombre unique de SIRET dans XCom
     ti.xcom_push(
-        key="nb_siren_formation",
-        value=str(df_liste_organisme_formation["siren"].nunique()),
+        key="nb_siret_formation",
+        value=str(df_grouped["siret"].nunique()),
     )
 
+    # Nettoyer les données inutiles
     del df_organisme_formation
-    del df_liste_organisme_formation
+    del df_grouped
 
 
 def send_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.FORMATION_TMP_FOLDER,
@@ -141,7 +109,7 @@ def send_file_to_minio():
 
 
 def compare_files_minio():
-    is_same = minio_client.compare_files(
+    is_same = s3_client.compare_files(
         file_path_1="formation/new/",
         file_name_2="formation.csv",
         file_path_2="formation/latest/",
@@ -153,7 +121,7 @@ def compare_files_minio():
     if is_same is None:
         logging.info("First time in this Minio env. Creating")
 
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.FORMATION_TMP_FOLDER,

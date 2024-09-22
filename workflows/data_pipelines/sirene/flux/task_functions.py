@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 import logging
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.utils import flatten_dict, save_dataframe
 from workflows.data_pipelines.sirene.flux.insee_client import (
     INSEEAPIClient,
@@ -124,7 +124,7 @@ def get_current_flux_etablissement(ti):
 
 
 def send_flux_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.INSEE_FLUX_TMP_FOLDER,
@@ -149,7 +149,7 @@ def send_flux_minio():
 
 
 def send_stock_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.INSEE_FLUX_TMP_FOLDER,
@@ -173,7 +173,7 @@ def send_notification(ti):
     )
     send_message(
         f"\U0001F7E2 Données Flux Sirene mises à jour - Disponibles sur Minio - Bucket "
-        f"{minio_client.bucket}\n"
+        f"{s3_client.bucket}\n"
         f"- {nb_flux_non_diffusible} unités légales non diffusibles modifiées"
         f" ce mois-ci\n"
         f"- {nb_flux_unite_legale}  unités légales modifiées ce mois-ci\n"

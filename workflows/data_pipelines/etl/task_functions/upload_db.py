@@ -5,13 +5,13 @@ import shutil
 import os
 
 from helpers.settings import Settings
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 
 current_date = datetime.now().date()
 
 
 def send_to_minio(list_files):
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=list_files,
     )
 

@@ -4,7 +4,7 @@ import shutil
 import logging
 import pandas as pd
 import requests
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 
 
@@ -40,7 +40,7 @@ def download_flux(data_dir):
     else:
         year_month = datetime.today().strftime("%Y-%m")
     logging.info(f"Downloading flux for : {year_month}")
-    minio_client.get_files(
+    s3_client.get_files(
         list_files=[
             {
                 "source_path": "insee/sirene/flux/",

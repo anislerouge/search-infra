@@ -83,9 +83,6 @@ x-airflow-common:
     MINIO_URL: ${MINIO_URL:-localhost}
     MINIO_USER: ${MINIO_USER:-minioadmin}
     MINIO_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
-    AIRFLOW_REMOTE_LOGGING: ${AIRFLOW_REMOTE_LOGGING:-True}
-    AIRFLOW_REMOTE_BASE_LOG_FOLDER: ${AIRFLOW_REMOTE_BASE_LOG_FOLDER:-s3://airflow-logs}
-    AIRFLOW_REMOTE_LOG_CONN_ID: ${AIRFLOW_REMOTE_LOG_CONN_ID:-minio_conn}
     AIRFLOW_DAG_HOME: ${AIRFLOW_DAG_HOME:-/opt/airflow/dags/}
     AIRFLOW_DAG_TMP: ${AIRFLOW_DAG_TMP:-/opt/airflow/data/tmp/}
     ENV: ${ENV:-dev}
@@ -117,6 +114,11 @@ x-airflow-common:
     API_URL: ${API_URL}
     API_IS_REMOTE: ${API_IS_REMOTE:-False}
     DATAGOUV_SECRET_API_KEY: ${DATAGOUV_SECRET_API_KEY}
+    SCW_ACCESS_KEY: ${SCW_ACCESS_KEY}
+    SCW_SECRET_KEY: ${SCW_SECRET_KEY}
+    SCW_S3_URL: ${SCW_S3_URL}
+    SCW_S3_REGION: ${SCW_S3_REGION}
+    SCW_S3_BUCKET: ${SCW_S3_BUCKET}
 
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags

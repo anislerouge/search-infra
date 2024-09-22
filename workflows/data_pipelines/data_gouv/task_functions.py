@@ -6,7 +6,7 @@ import logging
 import os
 import pandas as pd
 import json
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.sqlite_client import SqliteClient
 from helpers.datagouv import post_resource
 from workflows.data_pipelines.data_gouv.queries import (
@@ -40,7 +40,7 @@ today_date = datetime.today().strftime("%Y-%m-%d")
 
 
 def get_latest_database(**kwargs):
-    database_files = minio_client.get_files_from_prefix(
+    database_files = s3_client.get_files_from_prefix(
         prefix=Settings.SIRENE_MINIO_DATA_PATH,
     )
 
@@ -53,7 +53,7 @@ def get_latest_database(**kwargs):
     if dates:
         last_date = dates[-1]
         logging.info(f"***** Last database saved: {last_date}")
-        minio_client.get_files(
+        s3_client.get_files(
             list_files=[
                 {
                     "source_path": Settings.SIRENE_MINIO_DATA_PATH,
@@ -199,7 +199,7 @@ def fill_ul_file():
 
 
 def send_to_minio(list_files):
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=list_files,
     )
 

@@ -31,14 +31,14 @@ from workflows.data_pipelines.etl.sqlite.queries.dirigeants import (
 )
 
 
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 
 
 from helpers.settings import Settings
 
 
 def get_latest_rne_database():
-    minio_client.get_latest_file_minio(
+    s3_client.get_latest_file_minio(
         f"ae/{Settings.AIRFLOW_ENV}/rne/database/",
         f"{Settings.RNE_DATABASE_LOCATION}.gz",
     )

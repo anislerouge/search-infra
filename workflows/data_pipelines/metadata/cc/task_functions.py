@@ -4,7 +4,7 @@ import logging
 import json
 from datetime import datetime
 from helpers.tchap import send_message
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 
 
@@ -94,7 +94,7 @@ def create_metadata_concollective_json():
 
 
 def upload_json_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.METADATA_CC_TMP_FOLDER,
@@ -110,7 +110,7 @@ def send_notification_success_tchap():
     send_message(
         f"\U0001F7E2 Données :"
         f"\nMetadata Conventions Collectives mise à jour sur Minio "
-        f"- Bucket {minio_client.bucket}."
+        f"- Bucket {s3_client.bucket}."
     )
 
 

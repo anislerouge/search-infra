@@ -7,7 +7,7 @@ from helpers.datagouv import (
     get_resource,
 )
 
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 
 
 def download_latest_data(ti):
@@ -115,7 +115,7 @@ def process_uai(ti):
 
 
 def send_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.UAI_TMP_FOLDER,
@@ -128,7 +128,7 @@ def send_file_to_minio():
 
 
 def compare_files_minio():
-    is_same = minio_client.compare_files(
+    is_same = s3_client.compare_files(
         file_path_1="uai/new/",
         file_name_2="annuaire_uai.csv",
         file_path_2="uai/latest/",
@@ -140,7 +140,7 @@ def compare_files_minio():
     if is_same is None:
         logging.info("First time in this Minio env. Creating")
 
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.UAI_TMP_FOLDER,

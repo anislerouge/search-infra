@@ -76,6 +76,13 @@ class EnvSettings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_HOST: str = "postgres"
 
+    # S3 configuration
+    SCW_ACCESS_KEY: str = ""
+    SCW_SECRET_KEY: str = ""
+    SCW_S3_URL: str = ""
+    SCW_S3_REGION: str = ""
+    SCW_S3_BUCKET: str = ""
+
 env_settings = EnvSettings()
 
 class Settings:
@@ -123,7 +130,7 @@ class Settings:
     INSEE_FLUX_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}sirene/flux/"
     INSEE_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}sirene/ul/"
     MARCHE_INCLUSION_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}marche_inclusion/"
-    AGENCE_BIO_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}agence_bio/"
+    AGENCE_BIO_TMP_FOLDER: str = "data/tmp/agence_bio/"
     EGAPRO_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}egapro/"
     UAI_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}uai/"
     BILANS_FINANCIERS_TMP_FOLDER: str = f"{AIRFLOW_DAG_TMP}bilans_financiers/"
@@ -232,6 +239,13 @@ class Settings:
     DATAGOUV_URL: str = "https://www.data.gouv.fr"
     ORGA_REFERENCE: str = "646b7187b50b2a93b1ae3d45"
     DATAGOUV_SECRET_API_KEY: str = env_settings.DATAGOUV_SECRET_API_KEY
+
+    # S3 configuration
+    SCW_ACCESS_KEY: str = env_settings.SCW_ACCESS_KEY
+    SCW_SECRET_KEY: str = env_settings.SCW_SECRET_KEY
+    SCW_S3_URL: str = env_settings.SCW_S3_URL
+    SCW_S3_REGION: str = env_settings.SCW_S3_REGION
+    SCW_S3_BUCKET: str = env_settings.SCW_S3_BUCKET
 
 
 

@@ -4,7 +4,7 @@ from datetime import datetime
 from elasticsearch_dsl import connections
 
 from helpers.settings import Settings
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 
 from helpers.filesystem import (
     Filesystem,
@@ -12,8 +12,8 @@ from helpers.filesystem import (
 )
 
 filesystem = Filesystem(
-    minio_client,
-    f"{minio_client.get_root_dirpath()}/{Settings.ELASTIC_SNAPSHOT_MINIO_STATE_PATH}/",
+    s3_client,
+    f"{s3_client.get_root_dirpath()}/{Settings.ELASTIC_SNAPSHOT_MINIO_STATE_PATH}/",
     JsonSerializer(),
 )
 

@@ -6,3 +6,4 @@ output/
 .vscode/
 venv/
 logs/
+.DS_Store

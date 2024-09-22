@@ -2,7 +2,7 @@ import os
 import zipfile
 import logging
 from helpers.tchap import send_message
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 
 
@@ -14,7 +14,7 @@ def unzip_files_and_upload_minio(**kwargs):
             z.extract(file_info, path=Settings.RNE_STOCK_EXTRACTED_FILES_PATH)
 
             logging.info(f"Saving file {file_info.filename} in MinIO.....")
-            minio_client.send_files(
+            s3_client.send_files(
                 list_files=[
                     {
                         "source_path": Settings.RNE_STOCK_EXTRACTED_FILES_PATH,

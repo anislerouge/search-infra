@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import requests
 
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 from helpers.tchap import send_message
 
@@ -74,7 +74,7 @@ def preprocess_convcollective_data(ti):
 
 
 def send_file_to_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.CC_TMP_FOLDER,
@@ -87,7 +87,7 @@ def send_file_to_minio():
 
 
 def compare_files_minio():
-    is_same = minio_client.compare_files(
+    is_same = s3_client.compare_files(
         file_path_1="convention_collective/new/",
         file_name_2="cc.csv",
         file_path_2="convention_collective/latest/",
@@ -99,7 +99,7 @@ def compare_files_minio():
     if is_same is None:
         logging.info("First time in this Minio env. Creating")
 
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.CC_TMP_FOLDER,

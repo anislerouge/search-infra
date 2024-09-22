@@ -1,7 +1,7 @@
 import csv
 import requests
 import logging
-from helpers.minio_helpers import minio_client
+from helpers.s3_helpers import s3_client
 from helpers.settings import Settings
 
 
@@ -38,7 +38,7 @@ def get_structures_siae():
 
 
 def send_file_minio():
-    minio_client.send_files(
+    s3_client.send_files(
         list_files=[
             {
                 "source_path": Settings.MARCHE_INCLUSION_TMP_FOLDER,
